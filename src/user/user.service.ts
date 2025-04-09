@@ -17,43 +17,30 @@ const tokenService = new TokenService()
 export class UserService {
     private userClient = new PrismaClient().user
 
-    // async registration(email:string, password:string) {
-    //    const candidate = await this.userClient.findUnique({email})
-    // async createUser(user: IUser): Promise<User> {
-    //     console.log("user", user)
-    //     const userData = this.userClient.create({
-    //         data: user
-    //     })
-    //     return userData
-    // }
-
     async registration(email: string, password: string, name: string) {
-    // async registration(email: string, password: string, name: string): Promise<{ accsessToken: string, refreshToken: string, user: typeof UserDto } | null> {
-        let candidate = this.userClient.findUnique({
+        let candidate = await this.userClient.findUnique({
             where: { email },
         })
 
-        if (!candidate) {
+        if (candidate) {
             throw new Error(`Пользователь с таким адресом ${email} уже существует `)
         }
         const hashPassword = await bcrypt.hash(password, 3);
         const activationLink = uuidv4()
 
 
-        const userProfile = this.userClient.create({
+        const userProfile = await this.userClient.create({
             data: {
                 email, hash: hashPassword, name, id: activationLink, activationLink, isActivated: false
             }
         })
-        // const userProfile = this.createUser({ email, hash: hashPassword, name, id: activationLink, activationLink, isActivated: false })
-        // const userProfile =th { email, hash: hashPassword, name, id: activationLink, activationLink, isActivated: false };
+
 
 
         await sendActivationMail(email, activationLink)
 
-        const userDto = new UserDto({ email, name, id: activationLink,  isActivated:false})
+        const userDto = new UserDto(userProfile)
 
-        console.log("userDto", userDto)
 
         const tokens = tokenService.generateToken({ ...userDto })
 
@@ -62,8 +49,6 @@ export class UserService {
         return {
             ...tokens,
             user: userDto,
-
-
         }
     }
 

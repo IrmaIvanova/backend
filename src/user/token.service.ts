@@ -25,7 +25,6 @@ export class TokenService {
          where: { userId },
       })
 
-      console.log("tokenData",tokenData)
       if (tokenData) {
          tokenData.refreshToken = refreshToken;
          const refresh = this.token.update({
