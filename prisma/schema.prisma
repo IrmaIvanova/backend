@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  hash           String    @map("password_hash")
+  isActivated    Boolean
+  activationLink String
+  refreshToken  Token?
+  planner        Planner[]
+
+  @@map("user")
+}
+
+model Token {
+  refreshToken String @unique
+  userId       String @unique
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("token")
+}
+
+model Planner {
+  id     String @id @default(uuid())
+  date   String
+  userId String
+  user   User?  @relation(fields: [userId], references: [id])
+  tasks  Task[]
+
+  @@map("planner")
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  title     String
+  checked   Boolean
+  date      String
+  plannerId String?
+  planner   Planner? @relation(fields: [plannerId], references: [id])
+
+  @@map("task")
+}
