@@ -6,7 +6,12 @@ import bcrypt from 'bcrypt'
 import { v4 as uuidv4 } from 'uuid';
 import { TokenService } from './token.service'
 import { UserDto } from '../Dtos/user-dto'
-const sendActivationMail = new MailService().sendActivationMail
+import dotenv from "dotenv";
+
+
+dotenv.config()
+
+const mailService = new MailService()
 
 const tokenService = new TokenService()
 
@@ -37,7 +42,7 @@ export class UserService {
 
 
 
-        await sendActivationMail(email, activationLink)
+        await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`)
 
         const userDto = new UserDto(userProfile)
 
@@ -51,7 +56,23 @@ export class UserService {
             user: userDto,
         }
     }
+    async activate(activationLink: string) {
+        const user = await this.userClient.findUnique({
+            where: { id: activationLink },
+        })
+        if (!user) {
+            throw new Error(`Некорректная ссылка активации `)
+        }
 
+        user.isActivated = true;
+
+        await this.userClient.update({
+            where: { id: activationLink },
+            data: user
+
+        })
+
+    }
     async login(req: Request, res: Response, next: NextFunction) {
         try {
 
@@ -66,13 +87,7 @@ export class UserService {
 
         }
     }
-    async activate(req: Request, res: Response, next: NextFunction) {
-        try {
 
-        } catch {
-
-        }
-    }
     async refresh(req: Request, res: Response, next: NextFunction) {
         try {
 

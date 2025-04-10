@@ -1,6 +1,5 @@
 import jtw from 'jsonwebtoken'
 import dotenv from "dotenv";
-import { TokenSchema } from './token.model'
 import { PrismaClient, User } from '@prisma/client';
 
 dotenv.config()
@@ -20,7 +19,7 @@ export class TokenService {
       }
    }
    async saveToken(userId: string, refreshToken: string ) {
-      console.log("userId",userId, "refreshToken",refreshToken)
+   
       const tokenData = await this.token.findUnique({
          where: { userId },
       })

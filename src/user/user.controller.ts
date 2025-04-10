@@ -2,23 +2,15 @@ import { IUser } from './user.types'
 import { PrismaClient, User } from '@prisma/client';
 import { Request, Response, Router, NextFunction } from 'express';
 import { UserService } from './user.service'
+import dotenv from "dotenv";
+
+dotenv.config()
+
+
 
 const userService = new UserService()
 
 export class UserController {
-    // private userClient = new PrismaClient().user
-
-    // async createUser(req: Request, res: Response, next: NextFunction) {
-    //     try{
-    //         const { email, password, name, id } = req.body;
-    //         const userData = await userService.createUser({email, hash:password, name, id});
-    //         return res.json(userData)
-
-    //     }catch(e){
-
-    //     }
-       
-    // }
 
     async registration(req: Request, res: Response, next: NextFunction) {
         try {
@@ -32,6 +24,17 @@ export class UserController {
             console.log(e)
         }
     }
+    async activate(req: Request, res: Response, next: NextFunction) {
+        try {
+            const activationLink = req.params.link
+            await userService.activate(activationLink)
+
+            return res.redirect(process.env.CLIENT_URL)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
     async login(req: Request, res: Response, next: NextFunction) {
         try {
 
@@ -46,13 +49,7 @@ export class UserController {
 
         }
     }
-    async activate(req: Request, res: Response, next: NextFunction) {
-        try {
 
-        } catch {
-
-        }
-    }
     async refresh(req: Request, res: Response, next: NextFunction) {
         try {
 
