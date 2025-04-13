@@ -5,6 +5,8 @@ import { userRouter } from './src/user/user.router'
 import dotenv from "dotenv";
 import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
+// import { errorMiddleWare } from './src/middlewares/error-middleware'
+const errMiddleWare = require('./src/middlewares/error-middleware')
 
 dotenv.config()
 
@@ -23,11 +25,11 @@ async function main() {
 
     app.use(express.json())
     app.use(cookieParser())
-    
+
     app.use('/api', userRouter)
     app.use('/api/task/planner', plannerRouter)
     app.use('/api/task', taskRouter)
-  
+    app.use(errMiddleWare)
 
     app.all("*", (req, res) => {
 

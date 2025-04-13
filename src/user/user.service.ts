@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { TokenService } from './token.service'
 import { UserDto } from '../Dtos/user-dto'
 import dotenv from "dotenv";
-
+import { ApiError } from '../exeptions/api-errors'
 
 dotenv.config()
 
@@ -16,11 +16,22 @@ const mailService = new MailService()
 const tokenService = new TokenService()
 
 
-
-
-
 export class UserService {
     private userClient = new PrismaClient().user
+
+    async returnUserAccsess(user: any) {
+        const userDto = new UserDto(user)
+
+
+        const tokens = tokenService.generateToken({ ...userDto })
+
+        await tokenService.saveToken(userDto.id, tokens.refreshToken)
+
+        return {
+            ...tokens,
+            user: userDto,
+        }
+    }
 
     async registration(email: string, password: string, name: string) {
         let candidate = await this.userClient.findUnique({
@@ -28,7 +39,7 @@ export class UserService {
         })
 
         if (candidate) {
-            throw new Error(`Пользователь с таким адресом ${email} уже существует `)
+            throw ApiError.BadRequest(`Пользователь с таким адресом ${email} уже существует `)
         }
         const hashPassword = await bcrypt.hash(password, 3);
         const activationLink = uuidv4()
@@ -44,24 +55,26 @@ export class UserService {
 
         await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`)
 
-        const userDto = new UserDto(userProfile)
+        return await this.returnUserAccsess(userProfile)
+        // const userDto = new UserDto(userProfile)
 
 
-        const tokens = tokenService.generateToken({ ...userDto })
+        // const tokens = tokenService.generateToken({ ...userDto })
 
-        await tokenService.saveToken(userDto.id, tokens.refreshToken)
+        // await tokenService.saveToken(userDto.id, tokens.refreshToken)
 
-        return {
-            ...tokens,
-            user: userDto,
-        }
+        // return {
+        //     ...tokens,
+        //     user: userDto,
+        // }
     }
+
     async activate(activationLink: string) {
         const user = await this.userClient.findUnique({
             where: { id: activationLink },
         })
         if (!user) {
-            throw new Error(`Некорректная ссылка активации `)
+            throw ApiError.BadRequest(`Некорректная ссылка активации `)
         }
 
         user.isActivated = true;
@@ -73,54 +86,49 @@ export class UserService {
         })
 
     }
-    async login(req: Request, res: Response, next: NextFunction) {
-        try {
 
-        } catch {
+    async login(email: string, password: string) {
+        let user = await this.userClient.findUnique({
+            where: { email },
+        })
 
+        if (!user) {
+            throw ApiError.BadRequest(`Пользователь с адресом ${email} не найден`)
         }
-    }
-    async logout(req: Request, res: Response, next: NextFunction) {
-        try {
 
-        } catch {
-
+        const isPassEqual = bcrypt.compare(password, user?.hash)
+        if (!isPassEqual) {
+            throw ApiError.BadRequest(`Некорректный пароль`)
         }
-    }
 
-    async refresh(req: Request, res: Response, next: NextFunction) {
-        try {
-
-        } catch {
-
-        }
-    }
-    async getUsers(req: Request, res: Response, next: NextFunction) {
-        try {
-            res.json(["123", "456"])
-        } catch {
-
-        }
+        return await this.returnUserAccsess(user)
     }
 
+    async logout(refreshToken: string) {
+        const token = tokenService.removeToken(refreshToken)
+        return token;
+    }
 
-    // async createUser(user: IUser): Promise<User> {
-    //     return this.userClient.create({
-    //         data: user
-    //     });
-    // }
+    async refresh(refreshToken: string) {
+        if (!refreshToken) {
+            throw ApiError.UnauthorizedUser()
+        }
+        const userData = tokenService.validationRefreshToken(refreshToken);
+        const tokenFromDB = tokenService.findToken(refreshToken);
+        if (!userData || !tokenFromDB) {
+            throw ApiError.UnauthorizedUser()
+        }
 
-    // async getUser():Promise<User[]>{
-    //     return this.userClient.findMany({
-    //         include: { planner: true },
-    //       })
-    // }
-    // async getUserById(id: any): Promise<User | null> {
-    //       let task = this.userClient.findUnique({
-    //           where: { id },
-    //           include: { planner: true },
-    //       })
-    //       return task
-    //   }
+        const user = await this.userClient.findUnique({
+            where: { id: userData.email },
+        })
+
+        return await this.returnUserAccsess(user)
+    }
+
+    async getUsers() {
+        const users = await this.userClient.findMany()
+        return users
+    }
 
 }

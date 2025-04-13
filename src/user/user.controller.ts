@@ -3,6 +3,8 @@ import { PrismaClient, User } from '@prisma/client';
 import { Request, Response, Router, NextFunction } from 'express';
 import { UserService } from './user.service'
 import dotenv from "dotenv";
+import { validationResult } from 'express-validator'
+import { ApiError } from '../exeptions/api-errors'
 
 dotenv.config()
 
@@ -14,6 +16,10 @@ export class UserController {
 
     async registration(req: Request, res: Response, next: NextFunction) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return next(ApiError.BadRequest("Ошибка при валидации", errors.array()))
+            }
             const { email, password, name } = req.body;
             const userData = await userService.registration(email, password, name)
 
@@ -21,7 +27,7 @@ export class UserController {
 
             return res.json(userData)
         } catch (e) {
-            console.log(e)
+            next(e)
         }
     }
     async activate(req: Request, res: Response, next: NextFunction) {
@@ -31,58 +37,54 @@ export class UserController {
 
             return res.redirect(process.env.CLIENT_URL)
         } catch (e) {
-            console.log(e)
+            next(e)
         }
     }
 
     async login(req: Request, res: Response, next: NextFunction) {
         try {
+            const { email, password } = req.body;
+            const userData = await userService.login(email, password)
 
-        } catch {
+            res.cookie("refreshToken", userData?.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
 
+            return res.json(userData)
+        } catch (e) {
+            next(e)
         }
     }
     async logout(req: Request, res: Response, next: NextFunction) {
         try {
+            const { refreshToken } = req.cookies;
+            const token = await userService.logout(refreshToken)
 
-        } catch {
+            res.clearCookie("refreshToken")
 
+            return res.json(token)
+        } catch (e) {
+            next(e)
         }
     }
 
     async refresh(req: Request, res: Response, next: NextFunction) {
         try {
+            const { refreshToken } = req.cookies;
+            const userData = await userService.refresh(refreshToken)
 
-        } catch {
+            res.cookie("refreshToken", userData?.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
 
+            return res.json(userData)
+        } catch (e) {
+            next(e)
         }
     }
     async getUsers(req: Request, res: Response, next: NextFunction) {
         try {
-            res.json(["123", "456"])
-        } catch {
-
+          const users = await userService.getUsers();
+          return res.json(users)
+        } catch (e) {
+            next(e)
         }
     }
-
-
-    // async createUser(user: IUser): Promise<User> {
-    //     return this.userClient.create({
-    //         data: user
-    //     });
-    // }
-
-    // async getUser():Promise<User[]>{
-    //     return this.userClient.findMany({
-    //         include: { planner: true },
-    //       })
-    // }
-    // async getUserById(id: any): Promise<User | null> {
-    //       let task = this.userClient.findUnique({
-    //           where: { id },
-    //           include: { planner: true },
-    //       })
-    //       return task
-    //   }
 
 }
