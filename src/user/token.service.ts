@@ -19,7 +19,7 @@ export class TokenService {
       }
    }
 
-   validationAccessToken(accessToken: string) {
+     validationAccessToken(accessToken: string) {
       try {
          const userData = jtw.verify(accessToken, secretKey)
          return userData
@@ -27,7 +27,7 @@ export class TokenService {
          return null
       }
    }
-   validationRefreshToken(refreshToken: string) {
+    validationRefreshToken(refreshToken: string) {
       try {
          const userData = jtw.verify(refreshToken, secretRefreshKey)
          return userData

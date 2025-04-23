@@ -114,16 +114,18 @@ export class UserService {
             throw ApiError.UnauthorizedUser()
         }
         const userData = tokenService.validationRefreshToken(refreshToken);
-        const tokenFromDB = tokenService.findToken(refreshToken);
+        const tokenFromDB = await tokenService.findToken(refreshToken);
         if (!userData || !tokenFromDB) {
             throw ApiError.UnauthorizedUser()
         }
 
         const user = await this.userClient.findUnique({
-            where: { id: userData.email },
+            where: { email: userData.email },
         })
 
         return await this.returnUserAccsess(user)
+
+
     }
 
     async getUsers() {
