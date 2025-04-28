@@ -32,7 +32,6 @@ router.put('/:id', async (req: Request, res: Response) => {
     const taskId = req.params.id;
     const taskData = req.body
 
-    console.log("taskData",taskData)
     const task = await taskService.changeTask(taskId, taskData)
     res.json(task)
 })
