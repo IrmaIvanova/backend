@@ -10,7 +10,7 @@ const router = Router();
 
 const plannerService = new PlannerService()
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/:dayId', async (req: Request, res: Response) => {
 
     const planner = await plannerService.createPlanner(req.body)
   

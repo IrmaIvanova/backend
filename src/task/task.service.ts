@@ -6,7 +6,7 @@ export class TaskService {
     private taskClient = new PrismaClient().task
 
     createTask(task: ITask): Promise<Task> {
-        console.log("task222", task)
+    
         return this.taskClient.create({
             data: task
         });
