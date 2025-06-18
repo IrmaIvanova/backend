@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.ts",
     "dev": "ts-node-dev --respawn --transpile-only --exit-child  -r tsconfig-paths/register index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
