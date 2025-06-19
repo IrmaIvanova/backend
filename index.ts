@@ -2,6 +2,7 @@ import express from 'express'
 import { taskRouter } from './src/task/task.controller';
 import { plannerRouter } from './src/planner/planner.controller'
 import { userRouter } from './src/user/user.router'
+import { healthCheck } from './src/healthCheck.router'
 import dotenv from "dotenv";
 import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
@@ -32,6 +33,7 @@ async function main() {
     app.use(cookieParser())
 
     app.use('/api', userRouter)
+    app.use('/api/healthcheck', healthCheck)
     app.use('/api/task/planner', plannerRouter)
     app.use('/api/task', taskRouter)
     app.use(errMiddleWare)
