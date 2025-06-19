@@ -16,10 +16,5 @@
       "dest": "index.js",
       "continue": true
     }
-  ],
-  "protectionBypass": {
-    "/api/login": {
-      "bypass": true
-    }
-  }
+  ]
 }
