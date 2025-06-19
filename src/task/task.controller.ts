@@ -11,16 +11,22 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(task)
 })
 
-router.post('/', async (req: Request, res: Response) => {
+export const taskController = {
+  create: async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.body?.title?.trim()) {
+        res.status(400).json({ message: "Title is required" });
+        return; // Важно: return без значения
+      }
 
-    if (!req?.body?.title?.length) {
-        return res.status(400).json({ message: "Title is required" })
+      const task = await taskService.createTask(req.body);
+      res.status(201).json(task); // 201 для созданных ресурсов
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
     }
-
-    const task = await taskService.createTask(req.body)
-
-    res.status(200).json(task)
-})
+  }
+};
+router.post('/', taskController.create)
 
 router.get('/:id', async (req: Request, res: Response) => {
     const taskId = req.params.id

@@ -18,7 +18,8 @@ export class UserController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return next(ApiError.BadRequest("Ошибка при валидации", errors.array()))
+                const errorMessages = errors.array().map(err => err.msg);
+                return next(ApiError.BadRequest("Ошибка при валидации", errorMessages))
             }
             const { email, password, name } = req.body;
             const userData = await userService.registration(email, password, name)
@@ -35,7 +36,7 @@ export class UserController {
             const activationLink = req.params.link
             await userService.activate(activationLink)
 
-            return res.redirect(process.env.CLIENT_URL)
+            return res.redirect(process?.env?.CLIENT_URL || "https://irmaivanova.github.io")
         } catch (e) {
             next(e)
         }
@@ -80,8 +81,8 @@ export class UserController {
     }
     async getUsers(req: Request, res: Response, next: NextFunction) {
         try {
-          const users = await userService.getUsers();
-          return res.json(users)
+            const users = await userService.getUsers();
+            return res.json(users)
         } catch (e) {
             next(e)
         }
