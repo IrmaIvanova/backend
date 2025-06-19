@@ -15,12 +15,24 @@ var cors = require('cors')
 
 const app = express();
 
-app.use(cors({
-    credentials:true,
-    origin:process.env.CLIENT_URL
-    // origin:"https://irmaivanova.github.io/-task_scheduler/"
-    // origin:"https://irmaivanova.github.io/-task_scheduler/"
-}))
+const corsOptions = {
+  origin: [
+    'http://localhost:3000', // локальный фронтенд
+    // 'https://your-production-frontend.vercel.app' // продакшен фронтенд
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+
+app.options('*', cors(corsOptions));
+// app.use(cors({
+//     credentials:true,
+//     origin:process.env.CLIENT_URL
+//     // origin:"https://irmaivanova.github.io/-task_scheduler/"
+//     // origin:"https://irmaivanova.github.io/-task_scheduler/"
+// }))
 
 const prisma = new PrismaClient()
 
