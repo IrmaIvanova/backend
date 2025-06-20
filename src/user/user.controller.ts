@@ -31,7 +31,7 @@ export class UserController {
     //         next(e)
     //     }
     // }
-      async registration(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async registration(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -39,16 +39,24 @@ export class UserController {
                 next(ApiError.BadRequest("Ошибка при валидации", errorMessages));
                 return; // Явный return без значения
             }
-            
+
             const { email, password, name } = req.body;
             const userData = await userService.registration(email, password, name);
 
-            res.cookie("refreshToken", userData.refreshToken, { 
-                maxAge: 30 * 24 * 60 * 60 * 1000, 
-                httpOnly: true 
+            res.cookie("refreshToken", userData.refreshToken, {
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+                httpOnly: true
             });
 
-            res.json(userData); // Убрали return
+            res.header('Access-Control-Allow-Origin', 'https://irmaivanova.github.io')
+                .header('Access-Control-Allow-Credentials', 'true')
+                .cookie('refreshToken', userData.refreshToken, {
+                    httpOnly: true,
+                    sameSite: 'none',
+                    secure: true
+                })
+                .status(201)
+                .json(userData);
         } catch (e) {
             next(e);
         }
