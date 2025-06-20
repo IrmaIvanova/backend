@@ -1,3 +1,5 @@
+
+
 import express from 'express'
 import { taskRouter } from './src/task/task.controller';
 import { plannerRouter } from './src/planner/planner.controller'
@@ -6,52 +8,100 @@ import { healthCheck } from './src/healthCheck.router'
 import dotenv from "dotenv";
 import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
-// import { errorMiddleWare } from './src/middlewares/error-middleware'
-const errMiddleWare = require('./src/middlewares/error-middleware')
+import { errorMiddleware } from './src/middlewares/error-middleware'
+import cors from 'cors';
 
-dotenv.config()
-
-// const express = require("express");
-var cors = require('cors')
 
 const app = express();
+const prisma = new PrismaClient();
+const PORT = process.env.PORT || 5000;
 
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
-    credentials:true,
-    origin:process.env.CLIENT_URL
-    // origin:"https://irmaivanova.github.io/-task_scheduler/"
-    // origin:"https://irmaivanova.github.io/-task_scheduler/"
-}))
+    credentials: true,
+    origin: process.env.CLIENT_URL || 'https://irmaivanova.github.io'
+}));
 
-const prisma = new PrismaClient()
+// ... ваши роуты здесь ...
+app.use(express.json())
+app.use(cookieParser())
 
-const PORT = process.env.PORT;
+app.use('/api', userRouter)
+app.use('/api/healthcheck', healthCheck)
+app.use('/api/task/planner', plannerRouter)
+app.use('/api/task', taskRouter)
+
+
+app.all("*", (req, res) => {
+
+    res.status(404).json({ message: "NotFound" })
+})
+
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => { errorMiddleware });
 
 async function main() {
+    await prisma.$connect();
 
-    app.use(express.json())
-    app.use(cookieParser())
-
-    app.use('/api', userRouter)
-    app.use('/api/healthcheck', healthCheck)
-    app.use('/api/task/planner', plannerRouter)
-    app.use('/api/task', taskRouter)
-    app.use(errMiddleWare)
-
-    app.all("*", (req, res) => {
-
-        res.status(404).json({ message: "NotFound" })
-    })
-
-    app.listen(PORT || 5000, () => console.log('SERVER STARTED ON PORT ' + PORT))
+    app.listen(PORT, () => {
+        console.log(`Server started on port ${PORT}`);
+    });
 }
 
 main()
     .then(async () => {
-        await prisma.$connect()
+        await prisma.$disconnect();
     })
-    .catch(async e => {
-        console.error(e)
-        await prisma.$disconnect()
-        process.exit(1)
-    })
+    .catch(async (e) => {
+        console.error(e);
+        await prisma.$disconnect();
+        process.exit(1);
+    });
+
+// dotenv.config()
+
+// // const express = require("express");
+// var cors = require('cors')
+
+// const app = express();
+
+// app.use(cors({
+//     credentials: true,
+//     origin: process.env.CLIENT_URL
+//     // origin:"https://irmaivanova.github.io/-task_scheduler/"
+//     // origin:"https://irmaivanova.github.io/-task_scheduler/"
+// }))
+
+// const prisma = new PrismaClient()
+
+// const PORT = process.env.PORT;
+
+// async function main() {
+
+//     app.use(express.json())
+//     app.use(cookieParser())
+
+//     app.use('/api', userRouter)
+//     app.use('/api/healthcheck', healthCheck)
+//     app.use('/api/task/planner', plannerRouter)
+//     app.use('/api/task', taskRouter)
+
+
+//     app.all("*", (req, res) => {
+
+//         res.status(404).json({ message: "NotFound" })
+//     })
+//     app.use(errorMiddleware)
+//     app.listen(PORT || 5000, () => console.log('SERVER STARTED ON PORT ' + PORT))
+// }
+
+// main()
+//     .then(async () => {
+//         await prisma.$connect()
+//     })
+//     .catch(async e => {
+//         console.error(e)
+//         await prisma.$disconnect()
+//         process.exit(1)
+//     })

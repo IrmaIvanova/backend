@@ -17,8 +17,9 @@ router.post('/registration',
         userController.registration(req, res, next);
     })
 router.post('/login',
-    [body("email").isEmail(),
-    body("password").isLength({ min: 3, max: 32 })
+    [
+        body("email").isEmail(),
+        body("password").isLength({ min: 3, max: 32 })
     ],
     (req: Request, res: Response, next: NextFunction) => {
         userController.login(req, res, next)
