@@ -17,16 +17,32 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 // CORS настройки
+// const corsOptions = {
+//   origin: [
+//     'https://irmaivanova.github.io',
+//     'http://localhost:3000'
+//   ],
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// };
+const allowedOrigins = [
+  'https://irmaivanova.github.io',
+  'http://localhost:3000'
+];
+
 const corsOptions = {
-  origin: [
-    'https://irmaivanova.github.io',
-    'http://localhost:3000'
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
-
 // Middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // Для preflight запросов
