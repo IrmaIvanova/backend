@@ -4,8 +4,8 @@ import { PrismaClient, User } from '@prisma/client';
 
 dotenv.config()
 
-const secretKey = process.env.JWT_ACCESS_SECRET;
-const secretRefreshKey = process.env.JWT_REFRESH_SECRET;
+const secretKey = process.env.JWT_ACCESS_SECRET || "ascacac-acaacs-wetyu-eeeqef";
+const secretRefreshKey = process.env.JWT_REFRESH_SECRET || "ascacac-lkjhgcx-acaacs-wetyu-eeeqef";
 
 export class TokenService {
    private token = new PrismaClient().token;
@@ -19,7 +19,7 @@ export class TokenService {
       }
    }
 
-     validationAccessToken(accessToken: string) {
+   validationAccessToken(accessToken: string) {
       try {
          const userData = jtw.verify(accessToken, secretKey)
          return userData
@@ -27,7 +27,7 @@ export class TokenService {
          return null
       }
    }
-    validationRefreshToken(refreshToken: string) {
+   validationRefreshToken(refreshToken: string) {
       try {
          const userData = jtw.verify(refreshToken, secretRefreshKey)
          return userData
