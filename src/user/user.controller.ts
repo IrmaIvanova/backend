@@ -14,21 +14,43 @@ const userService = new UserService()
 
 export class UserController {
 
-    async registration(req: Request, res: Response, next: NextFunction) {
+    // async registration(req: Request, res: Response, next: NextFunction) {
+    //     try {
+    //         const errors = validationResult(req);
+    //         if (!errors.isEmpty()) {
+    //             const errorMessages = errors.array().map(err => err.msg);
+    //             return next(ApiError.BadRequest("Ошибка при валидации", errorMessages))
+    //         }
+    //         const { email, password, name } = req.body;
+    //         const userData = await userService.registration(email, password, name)
+
+    //         res.cookie("refreshToken", userData?.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
+
+    //         return res.json(userData)
+    //     } catch (e) {
+    //         next(e)
+    //     }
+    // }
+      async registration(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 const errorMessages = errors.array().map(err => err.msg);
-                return next(ApiError.BadRequest("Ошибка при валидации", errorMessages))
+                next(ApiError.BadRequest("Ошибка при валидации", errorMessages));
+                return; // Явный return без значения
             }
+            
             const { email, password, name } = req.body;
-            const userData = await userService.registration(email, password, name)
+            const userData = await userService.registration(email, password, name);
 
-            res.cookie("refreshToken", userData?.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true })
+            res.cookie("refreshToken", userData.refreshToken, { 
+                maxAge: 30 * 24 * 60 * 60 * 1000, 
+                httpOnly: true 
+            });
 
-            return res.json(userData)
+            res.json(userData); // Убрали return
         } catch (e) {
-            next(e)
+            next(e);
         }
     }
     async activate(req: Request, res: Response, next: NextFunction) {
