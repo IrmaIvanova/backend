@@ -49,6 +49,14 @@ app.use('/api/healthcheck', healthCheck);
 app.use('/api/task/planner', plannerRouter);
 app.use('/api/task', taskRouter);
 
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+});
 // Обработка 404
 app.all('*', (req, res) => {
   res.status(404).json({ message: 'Not Found' });
