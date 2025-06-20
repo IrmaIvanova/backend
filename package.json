@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --build",
-    "start": "node dist/index.js",
+      "build": "tsc && prisma generate",
+  "start": "node dist/index.js",
+  "vercel-build": "npm run build && cp -r src/views dist/views 2>/dev/null || true",
     "dev": "ts-node-dev --respawn --transpile-only --exit-child  -r tsconfig-paths/register index.ts",
     "postinstall": "prisma generate --no-engine && prisma migrate deploy"
   },
@@ -33,11 +34,11 @@
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.15.32",
+    "@types/node": "^22.13.10",
     "@types/nodemailer": "^6.4.17",
     "nodemon": "^3.1.9",
     "prisma": "^6.5.0",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.2"
   }
 }
