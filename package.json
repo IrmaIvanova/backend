@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.ts",
-    "dev": "ts-node-dev --respawn --transpile-only --exit-child  -r tsconfig-paths/register index.ts",
-    "postinstall": "prisma generate --no-engine && prisma migrate deploy"
+    "dev": "ts-node-dev --respawn --transpile-only --exit-child  -r tsconfig-paths/register index.ts"
   },
   "keywords": [],
   "author": "",
