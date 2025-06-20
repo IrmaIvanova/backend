@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2021", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "lib":["ES2021"],
+    "types": ["node", "express", "cors"],
     /* Modules */
     "module": "commonjs", /* Specify what module code is generated. */
     "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
