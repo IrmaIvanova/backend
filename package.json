@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-      "build": "tsc && prisma generate",
-  "start": "node dist/index.js",
-  "vercel-build": "npm run build && cp -r src/views dist/views 2>/dev/null || true",
+    "start": "node index.ts",
     "dev": "ts-node-dev --respawn --transpile-only --exit-child  -r tsconfig-paths/register index.ts",
     "postinstall": "prisma generate --no-engine && prisma migrate deploy"
   },
