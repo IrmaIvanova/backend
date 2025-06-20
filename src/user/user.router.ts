@@ -2,9 +2,8 @@ import { Request, Response, Router, NextFunction } from 'express';
 import { body } from 'express-validator'
 import { UserController } from './user.controller';
 
-// import { authMiddleWare } from '../middlewares/auth-middleware'
+import { authMiddleware } from '../middlewares/auth-middleware'
 
-const authMiddleWare = require('../middlewares/auth-middleware')
 const router = Router();
 
 const userController = new UserController()
@@ -31,7 +30,7 @@ router.get('/activate/:link', userController.activate)
 router.get('/refresh', (req: Request, res: Response, next: NextFunction) => {
     userController.refresh(req, res, next)
 })
-router.get('/users', authMiddleWare.authMiddleWare, (req: Request, res: Response, next: NextFunction) => {
+router.get('/users', authMiddleware, (req: Request, res: Response, next: NextFunction) => {
     userController.getUsers(req, res, next)
 })
 
