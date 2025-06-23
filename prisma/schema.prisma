@@ -14,8 +14,8 @@ model User {
   hash           String    @map("password_hash")
   isActivated    Boolean
   activationLink String
-  refreshToken  Token?
   planner        Planner[]
+  refreshToken   Token?
 
   @@map("user")
 }
@@ -32,7 +32,7 @@ model Planner {
   id     String @id @default(uuid())
   date   String
   userId String
-  user   User?  @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
   tasks  Task[]
 
   @@map("planner")
